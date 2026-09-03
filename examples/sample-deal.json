@@ -1,0 +1,11 @@
+{
+  "description": "Synthetic mid-size lifestyle integration. Not a real creator or campaign.",
+  "expectedViews": 25000,
+  "niche": "lifestyle",
+  "format": "integration",
+  "quotedFee": 550,
+  "actualViews": 21000,
+  "ctrPercent": 1.5,
+  "cvrPercent": 2,
+  "aov": 38
+}
