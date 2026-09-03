@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Privacy-first YouTube sponsorship calculator. Estimate fees, implied CPM, delivered CPM, and breakeven without sending data anywhere.">
+  <title>Creator Deal Math — Neil Fox Agency</title>
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #fff; --text: #1a1a1a; --muted: #5c5c5c;
+      --border: #d0d0d0; --primary: #0066cc; --primary-hover: #0052a3;
+      --success: #1a7f37; --tip-bg: #e8f4fc; --tip-border: #0066cc;
+      --warn-bg: #fff6e5; --warn-border: #c47b00; --history: #f5f5f5; --focus: #0066cc;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212; --surface: #1e1e1e; --text: #f0f0f0; --muted: #a0a0a0;
+        --border: #404040; --primary: #4da3ff; --primary-hover: #7bb8ff;
+        --success: #3fb950; --tip-bg: #0d2137; --tip-border: #4da3ff;
+        --warn-bg: #2a220f; --warn-border: #e3a31c; --history: #2a2a2a; --focus: #4da3ff;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 760px; margin: 0 auto; padding: 1.5rem; line-height: 1.55;
+      background: var(--bg); color: var(--text);
+    }
+    a { color: var(--primary); }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--focus); outline-offset: 2px;
+    }
+    .skip { position: absolute; left: -9999px; top: 0; background: var(--primary); color: #fff; padding: 0.5rem 1rem; }
+    .skip:focus { left: 0.5rem; top: 0.5rem; }
+    h1 { font-size: 1.5rem; margin-top: 0; }
+    .lede { color: var(--muted); }
+    .note, .warn { padding: 0.9rem 1rem; border-radius: 6px; margin: 1rem 0; font-size: 0.9rem; }
+    .note { background: var(--tip-bg); border-left: 4px solid var(--tip-border); }
+    .warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+    form { display: grid; gap: 0.35rem; }
+    label { margin-top: 0.75rem; font-weight: 600; font-size: 0.95rem; }
+    .tip { display: block; font-size: 0.82rem; color: var(--muted); font-weight: 400; }
+    input, select {
+      width: 100%; padding: 0.7rem 0.75rem; border: 1px solid var(--border);
+      border-radius: 6px; background: var(--surface); color: var(--text); font-size: 1rem;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+    button { padding: 0.75rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-weight: 600; }
+    .primary { background: var(--primary); color: #fff; margin-top: 1rem; width: 100%; }
+    .primary:hover { background: var(--primary-hover); }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .actions button { background: var(--history); color: var(--text); border: 1px solid var(--border); }
+    .result { background: var(--history); padding: 1.1rem; margin-top: 1.25rem; border-radius: 8px; border: 1px solid var(--border); }
+    .result h2 { font-size: 1.1rem; margin: 0 0 0.6rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; }
+    .card strong { display: block; font-size: 1.15rem; }
+    .status { min-height: 1.25rem; color: var(--success); }
+    .errors { color: #b42318; }
+    .footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <main id="main">
+    <h1>Creator Deal Math</h1>
+    <p class="lede">Plan a YouTube sponsorship fee and check whether the number can plausibly pay back. Everything runs in this browser. Nothing is uploaded.</p>
+    <div class="note" role="note">
+      Use <strong>median views from recent comparable videos</strong>, not subscriber count.
+      Suggested fees are planning ranges, not quotes.
+    </div>
+    <form id="dealForm">
+      <label for="expectedViews">Expected views
+        <span class="tip">Median views on recent comparable long-form videos</span>
+      </label>
+      <input id="expectedViews" name="expectedViews" inputmode="decimal" required placeholder="25000">
+      <div class="row">
+        <div>
+          <label for="niche">Niche band</label>
+          <select id="niche" name="niche"></select>
+        </div>
+        <div>
+          <label for="format">Deliverable format</label>
+          <select id="format" name="format"></select>
+        </div>
+      </div>
+      <div id="customCpmRow" class="row" hidden>
+        <div>
+          <label for="customCpmLow">Custom CPM low</label>
+          <input id="customCpmLow" name="customCpmLow" inputmode="decimal" placeholder="15">
+        </div>
+        <div>
+          <label for="customCpmMid">Custom CPM mid</label>
+          <input id="customCpmMid" name="customCpmMid" inputmode="decimal" placeholder="22">
+        </div>
+        <div>
+          <label for="customCpmHigh">Custom CPM high</label>
+          <input id="customCpmHigh" name="customCpmHigh" inputmode="decimal" placeholder="30">
+        </div>
+      </div>
+      <label for="quotedFee">Quoted or offered fee (optional)
+        <span class="tip">Leave blank to only see a suggested range</span>
+      </label>
+      <input id="quotedFee" name="quotedFee" inputmode="decimal" placeholder="1500">
+      <label for="actualViews">Actual views after the window (optional)
+        <span class="tip">Used only for delivered CPM. Often 30 days.</span>
+      </label>
+      <input id="actualViews" name="actualViews" inputmode="decimal" placeholder="18000">
+      <div class="row">
+        <div>
+          <label for="ctrPercent">Assumed CTR %
+            <span class="tip">Clicks / views. Example: 1.5</span>
+          </label>
+          <input id="ctrPercent" name="ctrPercent" inputmode="decimal" placeholder="1.5">
+        </div>
+        <div>
+          <label for="cvrPercent">Assumed conversion rate %
+            <span class="tip">Orders / clicks. Example: 2</span>
+          </label>
+          <input id="cvrPercent" name="cvrPercent" inputmode="decimal" placeholder="2">
+        </div>
+      </div>
+      <label for="aov">Average order value or contribution (optional)</label>
+      <input id="aov" name="aov" inputmode="decimal" placeholder="40">
+      <button type="submit" class="primary">Calculate</button>
+    </form>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <div id="result" class="result" hidden></div>
+  </main>
+  <footer class="footer">
+    <p>Companion to <a href="https://github.com/NeilFoxAgency/utm-builder-neil">utm-builder-neil</a> and <a href="https://github.com/NeilFoxAgency/creator-link-kit">creator-link-kit</a>. MIT licensed. No analytics, cookies, or network calls from this page after it loads.</p>
+  </footer>
+  <script src="src/deal-math.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var math = window.DealMath;
+      var nicheEl = document.getElementById("niche");
+      var formatEl = document.getElementById("format");
+      Object.keys(math.NICHE_CPM).forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = math.NICHE_CPM[key].label;
+        nicheEl.appendChild(opt);
+      });
+      Object.keys(math.FORMATS).forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = math.FORMATS[key].label;
+        formatEl.appendChild(opt);
+      });
+      nicheEl.value = "lifestyle";
+      formatEl.value = "integration";
+      function money(n) {
+        if (n == null) return "-";
+        return "$" + Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      }
+      function num(n) {
+        if (n == null) return "-";
+        return Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      }
+      function card(label, value) {
+        var div = document.createElement("div");
+        div.className = "card";
+        var k = document.createElement("span");
+        k.className = "tip";
+        k.textContent = label;
+        var v = document.createElement("strong");
+        v.textContent = value;
+        div.appendChild(k);
+        div.appendChild(v);
+        return div;
+      }
+      function readForm() {
+        return {
+          expectedViews: document.getElementById("expectedViews").value,
+          quotedFee: document.getElementById("quotedFee").value,
+          actualViews: document.getElementById("actualViews").value,
+          ctrPercent: document.getElementById("ctrPercent").value,
+          cvrPercent: document.getElementById("cvrPercent").value,
+          aov: document.getElementById("aov").value,
+          niche: document.getElementById("niche").value,
+          format: document.getElementById("format").value,
+          customCpmLow: document.getElementById("customCpmLow").value,
+          customCpmMid: document.getElementById("customCpmMid").value,
+          customCpmHigh: document.getElementById("customCpmHigh").value
+        };
+      }
+      function render(result) {
+        var box = document.getElementById("result");
+        var status = document.getElementById("status");
+        box.textContent = "";
+        if (!result.ok) {
+          box.hidden = true;
+          status.className = "status errors";
+          status.textContent = result.errors.join(" ");
+          return;
+        }
+        status.className = "status";
+        status.textContent = "Calculated locally. Nothing was sent anywhere.";
+        var h = document.createElement("h2");
+        h.textContent = "Planning readout";
+        box.appendChild(h);
+        var grid = document.createElement("div");
+        grid.className = "grid";
+        grid.appendChild(card("Suggested fee low", money(result.suggested.low)));
+        grid.appendChild(card("Suggested fee mid", money(result.suggested.mid)));
+        grid.appendChild(card("Suggested fee high", money(result.suggested.high)));
+        grid.appendChild(card("Implied CPM on expected views", money(result.impliedCpm)));
+        grid.appendChild(card("Delivered CPM on actual views", money(result.deliveredCpm)));
+        grid.appendChild(card("Estimated clicks", num(result.funnel.estimatedClicks)));
+        grid.appendChild(card("Estimated conversions", num(result.funnel.estimatedConversions)));
+        grid.appendChild(card("Estimated revenue", money(result.funnel.estimatedRevenue)));
+        grid.appendChild(card("CPA", money(result.funnel.cpa)));
+        grid.appendChild(card("ROAS", result.funnel.roas == null ? "-" : result.funnel.roas + "x"));
+        grid.appendChild(card("Breakeven conversion rate", result.funnel.breakevenCvrPercent == null ? "-" : result.funnel.breakevenCvrPercent + "%"));
+        box.appendChild(grid);
+        var warn = document.createElement("div");
+        warn.className = "warn";
+        warn.textContent = result.notes.join(" ");
+        box.appendChild(warn);
+        var actions = document.createElement("div");
+        actions.className = "actions";
+        var copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.textContent = "Copy summary";
+        copyBtn.addEventListener("click", function () {
+          var lines = [
+            "Suggested fee: " + money(result.suggested.low) + " - " + money(result.suggested.high) + " (mid " + money(result.suggested.mid) + ")",
+            "Implied CPM: " + money(result.impliedCpm),
+            "Delivered CPM: " + money(result.deliveredCpm),
+            "CPA: " + money(result.funnel.cpa),
+            "ROAS: " + (result.funnel.roas == null ? "-" : result.funnel.roas + "x")
+          ].join("\n");
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(lines).then(function () {
+              status.textContent = "Summary copied.";
+            });
+          }
+        });
+        var csvBtn = document.createElement("button");
+        csvBtn.type = "button";
+        csvBtn.textContent = "Download CSV";
+        csvBtn.addEventListener("click", function () {
+          var blob = new Blob([math.resultToCsv(result)], { type: "text/csv;charset=utf-8" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "creator-deal-math.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+          status.textContent = "CSV downloaded. Formula-like cells are neutralized.";
+        });
+        actions.appendChild(copyBtn);
+        actions.appendChild(csvBtn);
+        box.appendChild(actions);
+        box.hidden = false;
+      }
+      document.getElementById("niche").addEventListener("change", function () {
+        document.getElementById("customCpmRow").hidden = this.value !== "custom";
+      });
+      document.getElementById("dealForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        render(math.planDeal(readForm()));
+      });
+    })();
+  </script>
+</body>
+</html>
