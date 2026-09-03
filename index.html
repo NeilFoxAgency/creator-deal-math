@@ -101,6 +101,24 @@
           <input id="customCpmHigh" name="customCpmHigh" inputmode="decimal" placeholder="30">
         </div>
       </div>
+      <div class="row">
+        <div>
+          <label for="usage">Usage rights
+            <span class="tip">Paid reuse on top of the organic post</span>
+          </label>
+          <select id="usage" name="usage"></select>
+        </div>
+        <div>
+          <label for="exclusivity">Exclusivity
+            <span class="tip">Category lockout window</span>
+          </label>
+          <select id="exclusivity" name="exclusivity"></select>
+        </div>
+      </div>
+      <label for="extraPlacements">Extra organic placements
+        <span class="tip">Community posts, Shorts cutdowns, or similar extras. Each adds 15% of the organic base. 0-8.</span>
+      </label>
+      <input id="extraPlacements" name="extraPlacements" inputmode="numeric" placeholder="0" value="0">
       <label for="quotedFee">Quoted or offered fee (optional)
         <span class="tip">Leave blank to only see a suggested range</span>
       </label>
@@ -152,8 +170,24 @@
         opt.textContent = math.FORMATS[key].label;
         formatEl.appendChild(opt);
       });
+      var usageEl = document.getElementById("usage");
+      var exclEl = document.getElementById("exclusivity");
+      Object.keys(math.USAGE_RIGHTS).forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = math.USAGE_RIGHTS[key].label;
+        usageEl.appendChild(opt);
+      });
+      Object.keys(math.EXCLUSIVITY).forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = math.EXCLUSIVITY[key].label;
+        exclEl.appendChild(opt);
+      });
       nicheEl.value = "lifestyle";
       formatEl.value = "integration";
+      usageEl.value = "organic";
+      exclEl.value = "none";
       function money(n) {
         if (n == null) return "-";
         return "$" + Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
@@ -184,6 +218,9 @@
           aov: document.getElementById("aov").value,
           niche: document.getElementById("niche").value,
           format: document.getElementById("format").value,
+          usage: document.getElementById("usage").value,
+          exclusivity: document.getElementById("exclusivity").value,
+          extraPlacements: document.getElementById("extraPlacements").value,
           customCpmLow: document.getElementById("customCpmLow").value,
           customCpmMid: document.getElementById("customCpmMid").value,
           customCpmHigh: document.getElementById("customCpmHigh").value
@@ -209,6 +246,9 @@
         grid.appendChild(card("Suggested fee low", money(result.suggested.low)));
         grid.appendChild(card("Suggested fee mid", money(result.suggested.mid)));
         grid.appendChild(card("Suggested fee high", money(result.suggested.high)));
+        grid.appendChild(card("Organic base mid (no add-ons)", money(result.organicBase.mid)));
+        grid.appendChild(card("Quote vs range", result.quoteCheck.label));
+        grid.appendChild(card("Quote / suggested mid", result.quoteCheck.ratioToMid == null ? "-" : result.quoteCheck.ratioToMid + "x"));
         grid.appendChild(card("Implied CPM on expected views", money(result.impliedCpm)));
         grid.appendChild(card("Delivered CPM on actual views", money(result.deliveredCpm)));
         grid.appendChild(card("Estimated clicks", num(result.funnel.estimatedClicks)));
@@ -230,6 +270,9 @@
         copyBtn.addEventListener("click", function () {
           var lines = [
             "Suggested fee: " + money(result.suggested.low) + " - " + money(result.suggested.high) + " (mid " + money(result.suggested.mid) + ")",
+            "Organic base mid: " + money(result.organicBase.mid),
+            "Usage: " + result.usage.id + "; exclusivity: " + result.exclusivity.id + "; extras: " + result.extraPlacements,
+            result.quoteCheck.label,
             "Implied CPM: " + money(result.impliedCpm),
             "Delivered CPM: " + money(result.deliveredCpm),
             "CPA: " + money(result.funnel.cpa),

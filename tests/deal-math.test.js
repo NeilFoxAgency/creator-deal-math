@@ -127,3 +127,90 @@ test("CTR above 100 is rejected", () => {
   });
   assert.equal(result.ok, false);
 });
+
+test("organic defaults leave suggested fees unchanged", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+  });
+  assert.equal(result.usage.id, "organic");
+  assert.equal(result.exclusivity.id, "none");
+  assert.equal(result.extraPlacements, 0);
+  assert.equal(result.organicBase.mid, 220);
+  assert.equal(result.suggested.mid, 220);
+  assert.equal(result.quoteCheck.position, "none");
+});
+
+test("30-day whitelist multiplies the organic base", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+    usage: "boost30",
+  });
+  assert.equal(result.organicBase.mid, 220);
+  assert.equal(result.suggested.mid, 264);
+});
+
+test("exclusivity and extra placements stack on the organic base", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+    usage: "organic",
+    exclusivity: "days30",
+    extraPlacements: 2,
+  });
+  // mid base 220; 220 * 1 * 1.15 + 220 * 0.15 * 2 = 253 + 66 = 319
+  assert.equal(result.suggested.mid, 319);
+});
+
+test("quoted fee is flagged above the add-on range", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    quotedFee: 900,
+    niche: "lifestyle",
+    format: "integration",
+    usage: "organic",
+    exclusivity: "none",
+  });
+  assert.equal(result.quoteCheck.position, "above");
+  assert.equal(result.quoteCheck.ratioToMid, 4.09);
+});
+
+test("unknown usage option is rejected", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+    usage: "secret-clause",
+  });
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join(" "), /Unknown usage/);
+});
+
+test("extra placements above the cap are rejected", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+    extraPlacements: 12,
+  });
+  assert.equal(result.ok, false);
+});
+
+test("resultToCsv records add-on fields", () => {
+  const result = math.planDeal({
+    expectedViews: 10000,
+    niche: "lifestyle",
+    format: "integration",
+    usage: "whitelist90",
+    exclusivity: "days60",
+    extraPlacements: 1,
+  });
+  const csv = math.resultToCsv(result);
+  assert.match(csv, /Usage rights,whitelist90/);
+  assert.match(csv, /Exclusivity,days60/);
+  assert.match(csv, /Extra placements,1/);
+});

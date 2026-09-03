@@ -25,3 +25,13 @@ Problem: brands, creators, and small agencies repeatedly ask how to turn expecte
 - Neil Fox repos already cover strategy (creator-compass) and link hygiene (utm-builder-neil, creator-link-kit). None do deal math.
 
 This repository is intentionally smaller: transparent formulas, client-side only, tests for the arithmetic, and explicit "not a quote" labeling.
+
+## 2026-09-03 add-on follow-up
+
+Operators still need a transparent way to lift an organic views-based fee when a brief asks for paid reuse or a category lockout. Public creator-rate posts and agency briefs commonly treat:
+
+- Whitelisting / spark / paid amplification as a 20–75% lift depending on term
+- Category exclusivity as a 15–40% lift for 30–90 day windows
+- Extra organic assets as a fraction of the hero placement rather than a second full fee
+
+This repo keeps those as labeled planning multipliers. They are not a survey or a market index. Sources informing the shape (not copied): industry explainers on influencer whitelisting and exclusivity riders, plus the gap called out in this project's own README after the MVP landed.

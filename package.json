@@ -1,6 +1,6 @@
 {
   "name": "creator-deal-math",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Privacy-first calculator for YouTube creator sponsorship fees, implied CPM, delivered CPM, and campaign breakeven math.",
   "license": "MIT",
