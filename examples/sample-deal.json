@@ -1,5 +1,5 @@
 {
-  "description": "Synthetic mid-size lifestyle integration. Not a real creator or campaign.",
+  "description": "Synthetic mid-size lifestyle integration with 30-day paid boost, 30-day exclusivity, and one extra placement. Not a real creator or campaign.",
   "expectedViews": 25000,
   "niche": "lifestyle",
   "format": "integration",
@@ -7,5 +7,8 @@
   "actualViews": 21000,
   "ctrPercent": 1.5,
   "cvrPercent": 2,
-  "aov": 38
+  "aov": 38,
+  "usage": "boost30",
+  "exclusivity": "days30",
+  "extraPlacements": 1
 }
