@@ -124,7 +124,7 @@
       </label>
       <input id="quotedFee" name="quotedFee" inputmode="decimal" placeholder="1500">
       <label for="actualViews">Actual views after the window (optional)
-        <span class="tip">Used only for delivered CPM. Often 30 days.</span>
+        <span class="tip">Used for delivered CPM and make-good planning. Often 30 days.</span>
       </label>
       <input id="actualViews" name="actualViews" inputmode="decimal" placeholder="18000">
       <div class="row">
@@ -152,6 +152,8 @@
     <p>Companion to <a href="https://github.com/NeilFoxAgency/utm-builder-neil">utm-builder-neil</a> and <a href="https://github.com/NeilFoxAgency/creator-link-kit">creator-link-kit</a>. MIT licensed. No analytics, cookies, or network calls from this page after it loads.</p>
   </footer>
   <script src="src/deal-math.js"></script>
+  <script src="src/makegood.js"></script>
+  <script src="src/makegood-ui.js"></script>
   <script>
     (function () {
       "use strict";
@@ -223,7 +225,8 @@
           extraPlacements: document.getElementById("extraPlacements").value,
           customCpmLow: document.getElementById("customCpmLow").value,
           customCpmMid: document.getElementById("customCpmMid").value,
-          customCpmHigh: document.getElementById("customCpmHigh").value
+          customCpmHigh: document.getElementById("customCpmHigh").value,
+          makegoodPolicy: document.getElementById("makegoodPolicy") ? document.getElementById("makegoodPolicy").value : "report"
         };
       }
       function render(result) {
@@ -251,6 +254,11 @@
         grid.appendChild(card("Quote / suggested mid", result.quoteCheck.ratioToMid == null ? "-" : result.quoteCheck.ratioToMid + "x"));
         grid.appendChild(card("Implied CPM on expected views", money(result.impliedCpm)));
         grid.appendChild(card("Delivered CPM on actual views", money(result.deliveredCpm)));
+        if (result.makegood) {
+          grid.appendChild(card("Delivery vs expected views", result.makegood.present ? result.makegood.deliveryPercent + "%" : "-"));
+          grid.appendChild(card("Make-good readout", result.makegood.label));
+          grid.appendChild(card("Suggested make-good credit", money(result.makegood.credit)));
+        }
         grid.appendChild(card("Estimated clicks", num(result.funnel.estimatedClicks)));
         grid.appendChild(card("Estimated conversions", num(result.funnel.estimatedConversions)));
         grid.appendChild(card("Estimated revenue", money(result.funnel.estimatedRevenue)));
@@ -271,10 +279,10 @@
           var lines = [
             "Suggested fee: " + money(result.suggested.low) + " - " + money(result.suggested.high) + " (mid " + money(result.suggested.mid) + ")",
             "Organic base mid: " + money(result.organicBase.mid),
-            "Usage: " + result.usage.id + "; exclusivity: " + result.exclusivity.id + "; extras: " + result.extraPlacements,
             result.quoteCheck.label,
             "Implied CPM: " + money(result.impliedCpm),
             "Delivered CPM: " + money(result.deliveredCpm),
+            result.makegood ? result.makegood.label : "",
             "CPA: " + money(result.funnel.cpa),
             "ROAS: " + (result.funnel.roas == null ? "-" : result.funnel.roas + "x")
           ].join("\n");
