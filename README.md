@@ -56,12 +56,19 @@ Make-good planning helpers used here:
 - 80% floor: cash credit only for the gap below 80% of expected views
 - Extra asset at 80%: suggest one extra organic placement if delivery is below 80%
 
+## Campaign slate
+
+Optional panel on the same page. Paste a header plus one creator per line (`handle`, `expected_views`, optional `quoted_fee` / `niche` / `format`). The tool prices each row with the single-deal formulas and reports slate totals, blended CPM, and a 45% concentration flag.
+
+See [docs/CAMPAIGN.md](docs/CAMPAIGN.md). Example: `examples/sample-campaign.csv`.
+
 ## Limitations
 
 - Views are an input. The tool does not fetch YouTube Analytics.
 - Funnel results are only as good as the CTR, conversion rate, and AOV you type.
 - Add-on multipliers are planning defaults, not a contract clause or legal rate card.
 - Make-good figures are planning helpers for a conversation after the measurement window. They are not a warranty, SLA, or contract clause.
+- Slate totals do not model audience overlap.
 - Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
@@ -72,12 +79,12 @@ Requirements: Node.js 20+ for tests. The calculator itself has no build step.
 ```sh
 git clone https://github.com/NeilFoxAgency/creator-deal-math.git
 cd creator-deal-math
-node --test tests/deal-math.test.js
+node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js
 ```
 
 Then open `index.html` in a browser.
 
-A synthetic example lives in `examples/sample-deal.json`.
+Synthetic examples live in `examples/sample-deal.json` and `examples/sample-campaign.csv`.
 
 ## Privacy
 
