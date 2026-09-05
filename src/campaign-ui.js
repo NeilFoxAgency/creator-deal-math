@@ -71,6 +71,7 @@
       }
       const result = window.CampaignMath.planCampaign(area.value, planDeal);
       last = result;
+      window.__lastCampaignResult = result;
       out.textContent = "";
       if (!result.ok) {
         status.textContent = result.errors.join(" ");

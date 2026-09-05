@@ -62,6 +62,12 @@ Optional panel on the same page. Paste a header plus one creator per line (`hand
 
 See [docs/CAMPAIGN.md](docs/CAMPAIGN.md). Example: `examples/sample-campaign.csv`.
 
+## Payout milestones
+
+Optional panel on the same page. Pick a schedule (50/50, 100% on live, 30/40/30, or net-30 after live) and an optional go-live date. The tool splits the quoted fee, or each priced slate row, into booking / live / post-window cash buckets. Last milestone absorbs rounding so the parts still add up to the fee.
+
+See [docs/PAYOUT.md](docs/PAYOUT.md).
+
 ## Limitations
 
 - Views are an input. The tool does not fetch YouTube Analytics.
@@ -69,6 +75,7 @@ See [docs/CAMPAIGN.md](docs/CAMPAIGN.md). Example: `examples/sample-campaign.csv
 - Add-on multipliers are planning defaults, not a contract clause or legal rate card.
 - Make-good figures are planning helpers for a conversation after the measurement window. They are not a warranty, SLA, or contract clause.
 - Slate totals do not model audience overlap.
+- Payout dates assume one shared live date and a booking date 14 days earlier. They are not invoice terms.
 - Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
@@ -79,7 +86,7 @@ Requirements: Node.js 20+ for tests. The calculator itself has no build step.
 ```sh
 git clone https://github.com/NeilFoxAgency/creator-deal-math.git
 cd creator-deal-math
-node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js
+node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js tests/payout.test.js
 ```
 
 Then open `index.html` in a browser.
