@@ -27,7 +27,7 @@
       background: var(--bg); color: var(--text);
     }
     a { color: var(--primary); }
-    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
       outline: 2px solid var(--focus); outline-offset: 2px;
     }
     .skip { position: absolute; left: -9999px; top: 0; background: var(--primary); color: #fff; padding: 0.5rem 1rem; }
@@ -40,7 +40,7 @@
     form { display: grid; gap: 0.35rem; }
     label { margin-top: 0.75rem; font-weight: 600; font-size: 0.95rem; }
     .tip { display: block; font-size: 0.82rem; color: var(--muted); font-weight: 400; }
-    input, select {
+    input, select, textarea {
       width: 100%; padding: 0.7rem 0.75rem; border: 1px solid var(--border);
       border-radius: 6px; background: var(--surface); color: var(--text); font-size: 1rem;
     }
@@ -59,6 +59,10 @@
     .card strong { display: block; font-size: 1.15rem; }
     .status { min-height: 1.25rem; color: var(--success); }
     .errors { color: #b42318; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.4rem 0.35rem; border-bottom: 1px solid var(--border); }
+    details { margin: 1.25rem 0; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+    details summary { cursor: pointer; font-weight: 600; }
     .footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
   </style>
@@ -154,6 +158,8 @@
   <script src="src/deal-math.js"></script>
   <script src="src/makegood.js"></script>
   <script src="src/makegood-ui.js"></script>
+  <script src="src/campaign.js"></script>
+  <script src="src/campaign-ui.js"></script>
   <script>
     (function () {
       "use strict";
