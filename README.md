@@ -68,6 +68,18 @@ Optional panel on the same page. Pick a schedule (50/50, 100% on live, 30/40/30,
 
 See [docs/PAYOUT.md](docs/PAYOUT.md).
 
+## Agency commission
+
+Optional panel on the same page. Enter a commission percent (0–50) and who pays:
+
+- Brand markup: creator keeps the quoted fee; the brand pays fee + commission
+- Withhold from creator: the brand pays the quoted fee; the creator nets fee − commission
+- Split 50/50: half the commission is added to the brand invoice; half is withheld from the creator
+
+On a priced slate, each row uses `quoted_fee` when present, otherwise suggested mid.
+
+See [docs/COMMISSION.md](docs/COMMISSION.md).
+
 ## Limitations
 
 - Views are an input. The tool does not fetch YouTube Analytics.
@@ -76,6 +88,7 @@ See [docs/PAYOUT.md](docs/PAYOUT.md).
 - Make-good figures are planning helpers for a conversation after the measurement window. They are not a warranty, SLA, or contract clause.
 - Slate totals do not model audience overlap.
 - Payout dates assume one shared live date and a booking date 14 days earlier. They are not invoice terms.
+- Commission splits are planning sketches, not an MSA or invoice term.
 - Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
@@ -86,7 +99,7 @@ Requirements: Node.js 20+ for tests. The calculator itself has no build step.
 ```sh
 git clone https://github.com/NeilFoxAgency/creator-deal-math.git
 cd creator-deal-math
-node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js tests/payout.test.js
+node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js tests/payout.test.js tests/commission.test.js
 ```
 
 Then open `index.html` in a browser.
