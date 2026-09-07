@@ -9,6 +9,7 @@ Open `index.html` locally. The page never sends inputs to a server.
 - Brands and small agencies deciding whether an offered creator fee is in a plausible range
 - Creators who want a views-based starting point before a conversation
 - Operators who need implied CPM, delivered CPM, and a back-of-envelope CPA / ROAS check
+- Operators comparing a unique discount code against a flat fee or an affiliate percent
 
 It does **not** scrape channels, recommend creators, send outreach, or store campaign data.
 
@@ -29,6 +30,10 @@ It does **not** scrape channels, recommend creators, send outreach, or store cam
 | CPA | `fee / conversions` |
 | ROAS | `estimated revenue / fee` |
 | Breakeven CVR | `fee / (clicks * AOV)` |
+| Promo gross | `redemptions * AOV` |
+| Promo discount cost | `gross * discount percent` |
+| Promo CPA | `flat fee / redemptions` |
+| Promo ROAS | `net revenue after discount / flat fee` |
 
 Format multipliers used here:
 
@@ -80,6 +85,12 @@ On a priced slate, each row uses `quoted_fee` when present, otherwise suggested 
 
 See [docs/COMMISSION.md](docs/COMMISSION.md).
 
+## Discount code vs flat fee
+
+Optional panel on the same page. Enter redemptions on a unique creator code, AOV, the discount percent on that code, and the flat fee. The tool reports discount cost, brand net after the fee, CPA on redemptions, and effective ROAS on post-discount revenue. An optional affiliate percent shows whether that commission would have cost more or less than the flat fee on the **same** redemptions.
+
+See [docs/PROMO.md](docs/PROMO.md).
+
 ## Limitations
 
 - Views are an input. The tool does not fetch YouTube Analytics.
@@ -89,6 +100,7 @@ See [docs/COMMISSION.md](docs/COMMISSION.md).
 - Slate totals do not model audience overlap.
 - Payout dates assume one shared live date and a booking date 14 days earlier. They are not invoice terms.
 - Commission splits are planning sketches, not an MSA or invoice term.
+- Promo math does not connect to a store. Code redemptions are not proof of incremental or exclusive attribution.
 - Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
@@ -99,7 +111,7 @@ Requirements: Node.js 20+ for tests. The calculator itself has no build step.
 ```sh
 git clone https://github.com/NeilFoxAgency/creator-deal-math.git
 cd creator-deal-math
-node --test tests/deal-math.test.js tests/makegood.test.js tests/campaign.test.js tests/payout.test.js tests/commission.test.js
+npm test
 ```
 
 Then open `index.html` in a browser.
