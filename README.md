@@ -71,3 +71,7 @@ A synthetic example lives in `examples/sample-deal.json`.
 ## License
 
 MIT
+
+## Built by Neil Fox Agency
+
+This tool is built and maintained by [Neil Fox Agency](https://neilfoxagency.com/resources/youtube-sponsorship-rates), an independent YouTube creator-partnerships agency for consumer brands. Learn [the agency's sponsorship services](https://neilfoxagency.com/youtube-sponsorship-agency).
