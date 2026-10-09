@@ -74,4 +74,4 @@ MIT
 
 ## Built by Neil Fox Agency
 
-This tool is built and maintained by [Neil Fox Agency](https://neilfoxagency.com/resources/youtube-sponsorship-rates), an independent YouTube creator-partnerships agency for consumer brands. Learn [the agency's sponsorship services](https://neilfoxagency.com/youtube-sponsorship-agency).
+This tool is built and maintained by [Neil Fox Agency](https://neilfoxagency.com/resources/measure-youtube-sponsorship-results), an independent YouTube creator-partnerships agency for consumer brands. Learn [the agency's sponsorship services](https://neilfoxagency.com/for-brands).
