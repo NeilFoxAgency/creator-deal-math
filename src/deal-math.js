@@ -39,6 +39,63 @@ const NICHE_CPM = Object.freeze({
   custom: { id: "custom", label: "Custom CPM range", low: null, mid: null, high: null },
 });
 
+/**
+ * Paid usage / amplification rights on top of organic posting.
+ * Multipliers are planning defaults, not a rate card.
+ */
+const USAGE_RIGHTS = Object.freeze({
+  organic: {
+    id: "organic",
+    label: "Organic post only (no paid reuse)",
+    multiplier: 1,
+  },
+  boost30: {
+    id: "boost30",
+    label: "Paid boost / spark / whitelist up to 30 days",
+    multiplier: 1.2,
+  },
+  whitelist90: {
+    id: "whitelist90",
+    label: "Whitelisting / paid usage up to 90 days",
+    multiplier: 1.4,
+  },
+  perpetual: {
+    id: "perpetual",
+    label: "Perpetual paid usage / always-on ads",
+    multiplier: 1.75,
+  },
+});
+
+/**
+ * Category exclusivity windows. Multipliers are planning defaults.
+ */
+const EXCLUSIVITY = Object.freeze({
+  none: {
+    id: "none",
+    label: "No exclusivity",
+    multiplier: 1,
+  },
+  days30: {
+    id: "days30",
+    label: "Category exclusive 30 days",
+    multiplier: 1.15,
+  },
+  days60: {
+    id: "days60",
+    label: "Category exclusive 60 days",
+    multiplier: 1.25,
+  },
+  days90: {
+    id: "days90",
+    label: "Category exclusive 90 days",
+    multiplier: 1.4,
+  },
+});
+
+/** Extra organic placements priced as a fraction of the base mid fee. */
+const EXTRA_PLACEMENT_FRACTION = 0.15;
+const MAX_EXTRA_PLACEMENTS = 8;
+
 function toNumber(value) {
   if (value === "" || value == null) return null;
   const n = typeof value === "number" ? value : Number(String(value).replace(/,/g, "").trim());
@@ -60,6 +117,7 @@ function validateInputs(raw) {
   const customLow = toNumber(raw.customCpmLow);
   const customMid = toNumber(raw.customCpmMid);
   const customHigh = toNumber(raw.customCpmHigh);
+  const extraPlacementsRaw = toNumber(raw.extraPlacements);
 
   if (expectedViews == null || expectedViews <= 0) {
     errors.push("Expected views must be a number greater than 0.");
@@ -80,7 +138,29 @@ function validateInputs(raw) {
     errors.push("Average order value cannot be negative.");
   }
 
+  let extraPlacements = 0;
+  if (extraPlacementsRaw != null) {
+    if (
+      extraPlacementsRaw < 0 ||
+      extraPlacementsRaw > MAX_EXTRA_PLACEMENTS ||
+      extraPlacementsRaw !== Math.floor(extraPlacementsRaw)
+    ) {
+      errors.push("Extra placements must be a whole number from 0 to " + MAX_EXTRA_PLACEMENTS + ".");
+    } else {
+      extraPlacements = extraPlacementsRaw;
+    }
+  }
+
   const format = FORMATS[raw.format] || FORMATS.integration;
+  const usage = USAGE_RIGHTS[raw.usage] || USAGE_RIGHTS.organic;
+  const exclusivity = EXCLUSIVITY[raw.exclusivity] || EXCLUSIVITY.none;
+  if (raw.usage && !USAGE_RIGHTS[raw.usage]) {
+    errors.push("Unknown usage rights option.");
+  }
+  if (raw.exclusivity && !EXCLUSIVITY[raw.exclusivity]) {
+    errors.push("Unknown exclusivity option.");
+  }
+
   let niche = NICHE_CPM[raw.niche] || NICHE_CPM.lifestyle;
   if (raw.niche === "custom") {
     if (customLow == null || customMid == null || customHigh == null) {
@@ -110,7 +190,10 @@ function validateInputs(raw) {
       ctrPercent,
       cvrPercent,
       aov,
+      extraPlacements,
       format,
+      usage,
+      exclusivity,
       niche,
     },
   };
@@ -125,6 +208,29 @@ function cpmFromFee(fee, views) {
   return (fee / views) * 1000;
 }
 
+function applyAddOns(baseFee, usageMultiplier, exclusivityMultiplier, extraPlacements) {
+  const withRights = baseFee * usageMultiplier * exclusivityMultiplier;
+  const extras = baseFee * EXTRA_PLACEMENT_FRACTION * extraPlacements;
+  return roundMoney(withRights + extras);
+}
+
+function compareQuote(quotedFee, suggested) {
+  if (quotedFee == null) {
+    return { present: false, ratioToMid: null, position: "none", label: "No quote entered" };
+  }
+  const ratioToMid = suggested.mid > 0 ? roundMoney(quotedFee / suggested.mid) : null;
+  let position = "in_range";
+  let label = "Quote sits inside the planning range";
+  if (quotedFee < suggested.low) {
+    position = "below";
+    label = "Quote is below the planning low";
+  } else if (quotedFee > suggested.high) {
+    position = "above";
+    label = "Quote is above the planning high";
+  }
+  return { present: true, ratioToMid, position, label };
+}
+
 function planDeal(raw) {
   const checked = validateInputs(raw);
   if (!checked.ok) {
@@ -132,11 +238,16 @@ function planDeal(raw) {
   }
 
   const v = checked.values;
-  const multiplier = v.format.multiplier;
+  const formatMultiplier = v.format.multiplier;
+  const organicBase = {
+    low: feeFromCpm(v.expectedViews, v.niche.low, formatMultiplier),
+    mid: feeFromCpm(v.expectedViews, v.niche.mid, formatMultiplier),
+    high: feeFromCpm(v.expectedViews, v.niche.high, formatMultiplier),
+  };
   const suggested = {
-    low: roundMoney(feeFromCpm(v.expectedViews, v.niche.low, multiplier)),
-    mid: roundMoney(feeFromCpm(v.expectedViews, v.niche.mid, multiplier)),
-    high: roundMoney(feeFromCpm(v.expectedViews, v.niche.high, multiplier)),
+    low: applyAddOns(organicBase.low, v.usage.multiplier, v.exclusivity.multiplier, v.extraPlacements),
+    mid: applyAddOns(organicBase.mid, v.usage.multiplier, v.exclusivity.multiplier, v.extraPlacements),
+    high: applyAddOns(organicBase.high, v.usage.multiplier, v.exclusivity.multiplier, v.extraPlacements),
   };
 
   const impliedCpm =
@@ -168,10 +279,19 @@ function planDeal(raw) {
     errors: [],
     format: v.format,
     niche: v.niche,
+    usage: v.usage,
+    exclusivity: v.exclusivity,
+    extraPlacements: v.extraPlacements,
     expectedViews: v.expectedViews,
     quotedFee: v.quotedFee,
     actualViews: v.actualViews,
+    organicBase: {
+      low: roundMoney(organicBase.low),
+      mid: roundMoney(organicBase.mid),
+      high: roundMoney(organicBase.high),
+    },
     suggested,
+    quoteCheck: compareQuote(v.quotedFee, suggested),
     impliedCpm,
     deliveredCpm,
     funnel: {
@@ -186,6 +306,7 @@ function planDeal(raw) {
     notes: [
       "Use median views from recent comparable long-form videos, not subscriber count.",
       "Suggested fees are planning ranges, not a quote or a guarantee.",
+      "Usage, exclusivity, and extra-placement add-ons are planning multipliers, not a legal rate card.",
       "Delivered CPM uses actual views after the measurement window (often 30 days).",
       "Funnel math is only as good as the CTR, conversion rate, and AOV you enter.",
     ],
@@ -205,11 +326,17 @@ function resultToCsv(result) {
     ["Field", "Value"],
     ["Format", result.format.id],
     ["Niche", result.niche.id],
+    ["Usage rights", result.usage.id],
+    ["Exclusivity", result.exclusivity.id],
+    ["Extra placements", result.extraPlacements],
     ["Expected views", result.expectedViews],
+    ["Organic base mid", result.organicBase.mid],
     ["Suggested fee low", result.suggested.low],
     ["Suggested fee mid", result.suggested.mid],
     ["Suggested fee high", result.suggested.high],
     ["Quoted fee", result.quotedFee],
+    ["Quote position", result.quoteCheck.position],
+    ["Quote / mid", result.quoteCheck.ratioToMid],
     ["Implied CPM", result.impliedCpm],
     ["Actual views", result.actualViews],
     ["Delivered CPM", result.deliveredCpm],
@@ -226,10 +353,16 @@ function resultToCsv(result) {
 const api = {
   FORMATS,
   NICHE_CPM,
+  USAGE_RIGHTS,
+  EXCLUSIVITY,
+  EXTRA_PLACEMENT_FRACTION,
+  MAX_EXTRA_PLACEMENTS,
   toNumber,
   validateInputs,
   feeFromCpm,
   cpmFromFee,
+  applyAddOns,
+  compareQuote,
   planDeal,
   csvSafe,
   resultToCsv,
@@ -238,6 +371,6 @@ const api = {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = api;
 }
- if (typeof window !== "undefined") {
+if (typeof window !== "undefined") {
   window.DealMath = api;
 }

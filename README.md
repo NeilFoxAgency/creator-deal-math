@@ -16,7 +16,9 @@ It does **not** scrape channels, recommend creators, send outreach, or store cam
 
 | Output | Formula |
 | --- | --- |
-| Suggested fee | `expected views / 1,000 * niche CPM * format multiplier` |
+| Organic base fee | `expected views / 1,000 * niche CPM * format multiplier` |
+| Suggested fee | `organic base * usage multiplier * exclusivity multiplier + organic base * 0.15 * extra placements` |
+| Quote check | Compare quoted fee to the add-on-adjusted low / mid / high |
 | Implied CPM | `quoted fee / expected views * 1,000` |
 | Delivered CPM | `quoted fee / actual views * 1,000` |
 | Estimated clicks | `expected views * CTR` |
@@ -34,11 +36,22 @@ Format multipliers used here:
 
 Niche CPM bands are **planning defaults**, not a market index. Use the custom band when you have better numbers.
 
+Usage and exclusivity multipliers used here:
+
+- Organic only: 1.0
+- Paid boost / whitelist up to 30 days: 1.2
+- Whitelisting up to 90 days: 1.4
+- Perpetual paid usage: 1.75
+- No exclusivity: 1.0
+- 30 / 60 / 90 day category exclusivity: 1.15 / 1.25 / 1.4
+- Each extra organic placement: +15% of the organic base fee (max 8)
+
 ## Limitations
 
-- Views are an input. The tool does not fetch YouTube analytics.
+- Views are an input. The tool does not fetch YouTube Analytics.
 - Funnel results are only as good as the CTR, conversion rate, and AOV you type.
-- Usage rights, exclusivity, extra posts, whitelisting, and production time are not priced.
+- Add-on multipliers are planning defaults, not a contract clause or legal rate card.
+- Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
 ## Setup
