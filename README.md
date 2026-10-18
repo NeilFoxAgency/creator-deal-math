@@ -21,6 +21,9 @@ It does **not** scrape channels, recommend creators, send outreach, or store cam
 | Quote check | Compare quoted fee to the add-on-adjusted low / mid / high |
 | Implied CPM | `quoted fee / expected views * 1,000` |
 | Delivered CPM | `quoted fee / actual views * 1,000` |
+| Delivery % | `actual views / expected views` |
+| Make-good credit (pro-rata) | `quoted fee * max(0, expected - actual) / expected` |
+| Make-good credit (80% floor) | `quoted fee * max(0, 0.8 * expected - actual) / expected` when delivery is below 80% |
 | Estimated clicks | `expected views * CTR` |
 | Estimated conversions | `clicks * conversion rate` |
 | CPA | `fee / conversions` |
@@ -46,11 +49,19 @@ Usage and exclusivity multipliers used here:
 - 30 / 60 / 90 day category exclusivity: 1.15 / 1.25 / 1.4
 - Each extra organic placement: +15% of the organic base fee (max 8)
 
+Make-good planning helpers used here:
+
+- Report only: delivery % and view shortfall, no credit
+- Pro-rata: cash credit for every missed view against the quoted fee
+- 80% floor: cash credit only for the gap below 80% of expected views
+- Extra asset at 80%: suggest one extra organic placement if delivery is below 80%
+
 ## Limitations
 
 - Views are an input. The tool does not fetch YouTube Analytics.
 - Funnel results are only as good as the CTR, conversion rate, and AOV you type.
 - Add-on multipliers are planning defaults, not a contract clause or legal rate card.
+- Make-good figures are planning helpers for a conversation after the measurement window. They are not a warranty, SLA, or contract clause.
 - Production time, travel, and talent-specific premiums are still not priced.
 - A high-fit micro creator can outperform a cheaper large channel. Fit is out of scope; see [creator-compass](https://github.com/NeilFoxAgency/creator-compass).
 
