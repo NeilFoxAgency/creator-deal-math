@@ -254,11 +254,6 @@
         grid.appendChild(card("Quote / suggested mid", result.quoteCheck.ratioToMid == null ? "-" : result.quoteCheck.ratioToMid + "x"));
         grid.appendChild(card("Implied CPM on expected views", money(result.impliedCpm)));
         grid.appendChild(card("Delivered CPM on actual views", money(result.deliveredCpm)));
-        if (result.makegood) {
-          grid.appendChild(card("Delivery vs expected views", result.makegood.present ? result.makegood.deliveryPercent + "%" : "-"));
-          grid.appendChild(card("Make-good readout", result.makegood.label));
-          grid.appendChild(card("Suggested make-good credit", money(result.makegood.credit)));
-        }
         grid.appendChild(card("Estimated clicks", num(result.funnel.estimatedClicks)));
         grid.appendChild(card("Estimated conversions", num(result.funnel.estimatedConversions)));
         grid.appendChild(card("Estimated revenue", money(result.funnel.estimatedRevenue)));
